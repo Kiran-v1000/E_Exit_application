@@ -1,5 +1,8 @@
 import express from 'express';
 import cors from 'cors';
+import path from 'path';
+import { existsSync } from 'fs';
+import { fileURLToPath } from 'url';
 import { router as authRouter, authenticate } from './auth.js';
 import routes from './routes.js';
 
@@ -12,6 +15,13 @@ app.use(express.json());
 app.get('/api/v1/health', (req, res) => res.json({ success: true, data: 'ok' }));
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1', authenticate, routes);
+
+// Serve the built React app when client/dist exists (single-service hosting)
+const dist = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../client/dist');
+if (existsSync(dist)) {
+  app.use(express.static(dist));
+  app.get(/^(?!\/api).*/, (req, res) => res.sendFile(path.join(dist, 'index.html')));
+}
 
 app.use((err, req, res, next) => {
   console.error(err);
