@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ExitFlow — Employee Exit Management System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f6f7fb; --surface: #ffffff; --surface2: #f1f3f9;
+    --text: #14161f; --text2: #555b6e; --text3: #8b91a5;
+    --border: rgba(20,22,31,0.08); --border2: rgba(20,22,31,0.16);
+    --shadow: 0 1px 2px rgba(16,24,40,.04), 0 8px 24px -8px rgba(16,24,40,.10);
+    --shadow-lg: 0 24px 48px -16px rgba(79,70,229,.18);
+    --grad: linear-gradient(135deg,#6366f1 0%,#8b5cf6 50%,#d946ef 100%);
+    --grad-soft: linear-gradient(135deg,rgba(99,102,241,.10),rgba(217,70,239,.08));
+    --accent: #6366f1; --accent2: #d946ef;
+    --blue:#2563eb; --blue-bg:#e8efff; --blue-text:#1d4ed8;
+    --teal:#0d9488; --teal-bg:#dcf5f1; --teal-text:#0f766e;
+    --amber:#d97706; --amber-bg:#fdeed4; --amber-text:#b45309;
+    --coral:#e11d48; --coral-bg:#fde8ed; --coral-text:#be123c;
+    --purple:#7c3aed; --purple-bg:#efe9fe; --purple-text:#6d28d9;
+    --green:#16a34a; --green-bg:#e3f6e9; --green-text:#15803d;
+    --red:#dc2626; --red-bg:#fdeaea; --red-text:#b91c1c;
+    --gray-bg:#eceef4; --gray-text:#4b5163;
+    --radius:12px; --radius-lg:18px;
+    --font:'Inter',system-ui,sans-serif; --display:'Sora',var(--font);
+    --mono:'JetBrains Mono','Menlo',monospace;
+  }
+  html.dark {
+    --bg:#0b0d14; --surface:#13151f; --surface2:#1a1d2b;
+    --text:#eceef6; --text2:#a3a9bd; --text3:#6b7188;
+    --border:rgba(236,238,246,.08); --border2:rgba(236,238,246,.18);
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 24px -8px rgba(0,0,0,.5);
+    --shadow-lg:0 24px 48px -16px rgba(139,92,246,.25);
+    --grad-soft:linear-gradient(135deg,rgba(99,102,241,.16),rgba(217,70,239,.12));
+    --blue:#60a5fa; --blue-bg:#172554; --blue-text:#bfdbfe;
+    --teal:#2dd4bf; --teal-bg:#042f2e; --teal-text:#99f6e4;
+    --amber:#fbbf24; --amber-bg:#3b2503; --amber-text:#fde68a;
+    --coral:#fb7185; --coral-bg:#4c0519; --coral-text:#fecdd3;
+    --purple:#a78bfa; --purple-bg:#2e1065; --purple-text:#ddd6fe;
+    --green:#4ade80; --green-bg:#052e16; --green-text:#bbf7d0;
+    --red:#f87171; --red-bg:#450a0a; --red-text:#fecaca;
+    --gray-bg:#23263a; --gray-text:#c4c8d8;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:14px;line-height:1.6;transition:background .3s,color .3s}
+  body::before{content:'';position:fixed;inset:0;z-index:-1;background:
+    radial-gradient(600px 360px at 12% -5%,rgba(99,102,241,.14),transparent 60%),
+    radial-gradient(700px 420px at 95% 0%,rgba(217,70,239,.10),transparent 60%);pointer-events:none}
+  .page{max-width:1200px;margin:0 auto;padding:28px 24px 64px}
+  @media(max-width:600px){.page{padding:18px 14px 48px}}
+
+  /* Header */
+  .hero{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:26px;animation:rise .6s cubic-bezier(.2,.7,.3,1) both}
+  .hero h1{font-family:var(--display);font-size:clamp(20px,4vw,28px);font-weight:800;letter-spacing:-.02em;
+    background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .hero p{color:var(--text2);font-size:13.5px;margin-top:4px}
+  .theme-btn{flex-shrink:0;width:42px;height:42px;border-radius:12px;border:1px solid var(--border2);background:var(--surface);
+    cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text2);box-shadow:var(--shadow);transition:transform .2s,color .2s}
+  .theme-btn:hover{transform:translateY(-2px) rotate(8deg);color:var(--accent)}
+  .theme-btn svg{width:20px;height:20px}
+  html:not(.dark) .icon-sun{display:none} html.dark .icon-moon{display:none}
+
+  /* Tabs */
+  .tabs{display:flex;gap:6px;margin-bottom:26px;background:var(--surface);border:1px solid var(--border);border-radius:14px;
+    padding:5px;box-shadow:var(--shadow);overflow-x:auto;scrollbar-width:none;position:sticky;top:12px;z-index:10;
+    backdrop-filter:blur(12px);animation:rise .6s .08s cubic-bezier(.2,.7,.3,1) both}
+  .tabs::-webkit-scrollbar{display:none}
+  .tab{display:flex;align-items:center;gap:7px;padding:9px 16px;border-radius:10px;cursor:pointer;font-size:13px;font-weight:600;
+    color:var(--text2);white-space:nowrap;transition:all .25s;border:none;background:transparent}
+  .tab svg{width:15px;height:15px;flex-shrink:0}
+  .tab:hover{color:var(--text);background:var(--surface2)}
+  .tab.active{background:var(--grad);color:#fff;box-shadow:0 6px 16px -4px rgba(124,58,237,.45)}
+  .panel{display:none}
+  .panel.active{display:block}
+  .panel.active>*{animation:rise .55s cubic-bezier(.2,.7,.3,1) both}
+  .panel.active>*:nth-child(2){animation-delay:.07s}
+  .panel.active>*:nth-child(3){animation-delay:.14s}
+  .panel.active>*:nth-child(4){animation-delay:.21s}
+  .panel.active>*:nth-child(5){animation-delay:.28s}
+  .panel.active>*:nth-child(6){animation-delay:.35s}
+  @keyframes rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+  @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+  /* Cards */
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:22px 24px;margin-bottom:20px;
+    box-shadow:var(--shadow);transition:box-shadow .3s,transform .3s,border-color .3s;position:relative;overflow:hidden}
+  .card:hover{box-shadow:var(--shadow-lg);transform:translateY(-2px);border-color:rgba(124,58,237,.25)}
+  .card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--grad);opacity:0;transition:opacity .3s}
+  .card:hover::before{opacity:1}
+  @media(max-width:600px){.card{padding:16px}}
+  .card-title{font-family:var(--display);font-size:16px;font-weight:700;letter-spacing:-.01em;margin-bottom:4px}
+  .card-sub{font-size:12.5px;color:var(--text3);margin-bottom:16px}
+  .section-label{font-size:11px;font-weight:600;letter-spacing:.1em;color:var(--text3);text-transform:uppercase;margin:18px 0 10px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  @media(max-width:760px){.grid2,.grid3{grid-template-columns:1fr}}
+
+  .badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:600;letter-spacing:.01em}
+  .badge-blue{background:var(--blue-bg);color:var(--blue-text)}
+  .badge-teal{background:var(--teal-bg);color:var(--teal-text)}
+  .badge-amber{background:var(--amber-bg);color:var(--amber-text)}
+  .badge-coral{background:var(--coral-bg);color:var(--coral-text)}
+  .badge-purple{background:var(--purple-bg);color:var(--purple-text)}
+  .badge-green{background:var(--green-bg);color:var(--green-text)}
+  .badge-gray{background:var(--gray-bg);color:var(--gray-text)}
+  .badge-red{background:var(--red-bg);color:var(--red-text)}
+
+  /* Tables */
+  .db-table{width:100%;border-collapse:collapse;font-size:12.5px}
+  .db-table th{text-align:left;padding:9px 12px;background:var(--surface2);color:var(--text3);font-weight:600;font-size:10.5px;
+    text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--border)}
+  .db-table td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:top}
+  .db-table tr:last-child td{border-bottom:none}
+  .db-table tr:hover td{background:var(--grad-soft)}
+  .pk{color:var(--amber);font-weight:700;font-size:10px}
+  .fk{color:var(--blue);font-weight:700;font-size:10px}
+  .col-type{font-family:var(--mono);color:var(--text3);font-size:11px}
+  .col-name{font-family:var(--mono);font-weight:600}
+  .nullable{color:var(--text3);font-size:11px}
+  .table-scroll{overflow-x:auto}
+
+  /* API routes */
+  .route{display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border:1px solid var(--border);border-radius:var(--radius);
+    margin-bottom:9px;background:var(--surface);transition:border-color .2s,transform .2s,box-shadow .2s}
+  .route:hover{border-color:rgba(124,58,237,.35);transform:translateX(4px);box-shadow:var(--shadow)}
+  .method{font-family:var(--mono);font-size:11px;font-weight:700;padding:4px 8px;border-radius:7px;flex-shrink:0;min-width:50px;text-align:center}
+  .GET{background:var(--green-bg);color:var(--green-text)}
+  .POST{background:var(--blue-bg);color:var(--blue-text)}
+  .PUT{background:var(--amber-bg);color:var(--amber-text)}
+  .PATCH{background:var(--purple-bg);color:var(--purple-text)}
+  .DELETE{background:var(--red-bg);color:var(--red-text)}
+  .route-path{font-family:var(--mono);font-size:12px;font-weight:600;word-break:break-all}
+  .route-desc{font-size:12px;color:var(--text2);margin-top:2px}
+  .route-roles{display:flex;gap:5px;margin-top:6px;flex-wrap:wrap}
+  @media(max-width:600px){.route{flex-direction:column;gap:8px}}
+
+  /* Workflow */
+  .flow-step{display:flex;gap:16px}
+  .flow-spine{display:flex;flex-direction:column;align-items:center}
+  .flow-dot{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;
+    font-weight:700;flex-shrink:0;box-shadow:0 4px 12px -2px rgba(124,58,237,.3);border:2px solid var(--surface)}
+  .flow-line{width:2px;background:linear-gradient(180deg,var(--accent),var(--accent2));opacity:.3;flex:1;min-height:24px}
+  .flow-body{padding-bottom:24px;flex:1;padding-top:5px}
+  .flow-title{font-family:var(--display);font-size:14.5px;font-weight:700;margin-bottom:4px}
+  .flow-detail{font-size:12.5px;color:var(--text2)}
+  .flow-actors{display:flex;gap:6px;margin-top:9px;flex-wrap:wrap}
+
+  /* Roles */
+  .role-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px;
+    transition:transform .25s,box-shadow .25s,border-color .25s}
+  .role-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-lg);border-color:rgba(124,58,237,.3)}
+  .role-icon{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:12px}
+  .role-icon svg{width:20px;height:20px}
+  .role-name{font-family:var(--display);font-size:13.5px;font-weight:700;margin-bottom:8px}
+  .role-perms{list-style:none}
+  .role-perms li{font-size:11.5px;color:var(--text2);padding:2.5px 0 2.5px 16px;position:relative}
+  .role-perms li::before{content:'';position:absolute;left:0;top:9px;width:8px;height:8px;border-radius:2px;background:var(--grad);opacity:.6}
+
+  /* Schema groups */
+  .schema-group{margin-bottom:30px}
+  .schema-group-title{font-family:var(--display);font-size:13px;font-weight:700;color:var(--text2);margin-bottom:12px;
+    padding:8px 14px;background:var(--grad-soft);border:1px solid var(--border);border-radius:10px;display:flex;align-items:center;gap:10px}
+  .table-wrap{border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:14px;background:var(--surface);
+    box-shadow:var(--shadow);transition:box-shadow .3s}
+  .table-wrap:hover{box-shadow:var(--shadow-lg)}
+  .table-header{padding:11px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+    background:linear-gradient(90deg,var(--surface2),transparent)}
+  .table-name{font-family:var(--mono);font-weight:700;font-size:13px}
+  .table-desc{font-size:11.5px;color:var(--text3)}
+
+  .index-pill{display:inline-block;background:var(--surface2);border:1px solid var(--border);border-radius:999px;padding:3px 10px;
+    font-family:var(--mono);font-size:11px;color:var(--text2);margin:3px;transition:all .2s}
+  .index-pill:hover{border-color:var(--accent);color:var(--accent);transform:scale(1.05)}
+
+  pre{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:16px;font-family:var(--mono);
+    font-size:12px;overflow-x:auto;line-height:1.7;margin:10px 0}
+  code{font-family:var(--mono);font-size:12px;background:var(--surface2);padding:1px 5px;border-radius:4px}
+
+  .stat-chip{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text2)}
+  a:focus-visible,button:focus-visible,.tab:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="hero">
+    <div>
+      <h1>ExitFlow — Employee Exit Management System</h1>
+      <p>Database schema · API routes · Role-based workflow · Architecture overview</p>
+    </div>
+    <button class="theme-btn" id="themeBtn" aria-label="Toggle dark / light theme">
+      <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg>
+      <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+    </button>
+  </div>
+
+  <div class="tabs" role="tablist">
+    <button class="tab active" role="tab" onclick="showTab('workflow',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Workflow &amp; Roles</button>
+    <button class="tab" role="tab" onclick="showTab('schema',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+      Database Schema</button>
+    <button class="tab" role="tab" onclick="showTab('api',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+      API Routes</button>
+    <button class="tab" role="tab" onclick="showTab('arch',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+      Architecture</button>
+  </div>
+
+  <!-- ===== WORKFLOW ===== -->
+  <div id="tab-workflow" class="panel active">
+
+    <div class="card">
+      <div class="card-title">System roles</div>
+      <div class="card-sub">Who participates in the exit process and what they can do</div>
+      <div class="grid3" style="grid-template-columns:repeat(auto-fit,minmax(165px,1fr))">
+
+        <div class="role-card">
+          <div class="role-icon badge-teal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+          <div class="role-name">Employee</div>
+          <ul class="role-perms"><li>Submit resignation</li><li>Track clearance status</li><li>Upload KT documents</li><li>Fill exit survey</li><li>Download final docs</li></ul>
+        </div>
+
+        <div class="role-card">
+          <div class="role-icon badge-blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></div>
+          <div class="role-name">Reporting Manager</div>
+          <ul class="role-perms"><li>Approve / reject resignation</li><li>Assign KT tasks</li><li>Confirm KT completion</li><li>Plan succession</li><li>Submit on behalf</li></ul>
+        </div>
+
+        <div class="role-card">
+          <div class="role-icon badge-purple"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 21h18M5 21V7l7-4 7 4v14"/><path d="M9 9h1m4 0h1M9 13h1m4 0h1M9 17h1m4 0h1"/></svg></div>
+          <div class="role-name">HR</div>
+          <ul class="role-perms"><li>Final approval authority</li><li>Conduct exit interviews</li><li>Configure notice periods</li><li>Generate relieving letter</li><li>View attrition analytics</li></ul>
+        </div>
+
+        <div class="role-card">
+          <div class="role-icon badge-amber"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></div>
+          <div class="role-name">Department HOD</div>
+          <ul class="role-perms"><li>Give dept clearance</li><li>Mark assets returned</li><li>Reject with reason</li><li>View pending clearances</li></ul>
+        </div>
+
+        <div class="role-card">
+          <div class="role-icon badge-coral"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+          <div class="role-name">Finance / Payroll</div>
+          <ul class="role-perms"><li>Calculate F&amp;F settlement</li><li>Apply deductions</li><li>Release final payment</li><li>Generate F&amp;F statement</li></ul>
+        </div>
+
+        <div class="role-card">
+          <div class="role-icon badge-gray"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div>
+          <div class="role-name">Super Admin</div>
+          <ul class="role-perms"><li>Configure workflows</li><li>Manage notice policies</li><li>Define clearance depts</li><li>Manage user roles</li><li>Full audit access</li></ul>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">End-to-end exit workflow</div>
+      <div class="card-sub">Sequential stages from resignation to final settlement</div>
+
+      <div style="margin-top:8px">
+        <div class="flow-step">
+          <div class="flow-spine"><div class="flow-dot badge-teal">1</div><div class="flow-line"></div></div>
+          <div class="flow-body">
+            <div class="flow-title">Resignation initiation</div>
+            <div class="flow-detail">Employee submits an online resignation form with exit reason, preferred last working date, and optional note. System auto-calculates the policy-based last working date using notice period rules. Employee or manager can initiate; absconding cases handled separately.</div>
+            <div class="flow-actors"><span class="badge badge-teal">Employee</span><span class="badge badge-blue">Manager (on behalf)</span></div>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-spine"><div class="flow-dot badge-blue">2</div><div class="flow-line"></div></div>
+          <div class="flow-body">
+            <div class="flow-title">Multi-level approval</div>
+            <div class="flow-detail">Resignation routes through configurable approval chain: Reporting Manager → BU Head (optional) → HR. Each approver gets email + in-app notification with SLA timer. On rejection, employee is notified with reason and can appeal or resubmit. Withdrawal window configurable by policy.</div>
+            <div class="flow-actors"><span class="badge badge-blue">Reporting Manager</span><span class="badge badge-purple">HR</span></div>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-spine"><div class="flow-dot badge-amber">3</div><div class="flow-line"></div></div>
+          <div class="flow-body">
+            <div class="flow-title">Knowledge transfer tasks</div>
+            <div class="flow-detail">Upon approval, manager assigns KT tasks (documents, handover sessions, codebase walkthroughs) to the employee with deadlines. Employee uploads artifacts and marks tasks done. Manager confirms completion. System blocks F&amp;F until KT is signed off.</div>
+            <div class="flow-actors"><span class="badge badge-blue">Manager</span><span class="badge badge-teal">Employee</span></div>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-spine"><div class="flow-dot badge-coral">4</div><div class="flow-line"></div></div>
+          <div class="flow-body">
+            <div class="flow-title">Department clearances</div>
+            <div class="flow-detail">Parallel clearance requests sent to all departments simultaneously: IT (access revocation, device return), Admin (ID card, parking, desk), Finance (expenses, loans, advances), Projects (handover sign-off), Library (assets). Each HOD marks cleared or flags pending. Dashboard shows real-time status.</div>
+            <div class="flow-actors"><span class="badge badge-amber">IT HOD</span><span class="badge badge-amber">Admin HOD</span><span class="badge badge-amber">Finance HOD</span><span class="badge badge-amber">Projects HOD</span></div>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-spine"><div class="flow-dot badge-purple">5</div><div class="flow-line"></div></div>
+          <div class="flow-body">
+            <div class="flow-title">Exit interview &amp; survey</div>
+            <div class="flow-detail">HR schedules exit interview (online or in-person). Anonymous survey covers: work culture, manager relationship, compensation, growth, work-life balance. Survey responses visible only to HR leadership — never to reporting manager. Triggers sentiment analytics in the attrition dashboard.</div>
+            <div class="flow-actors"><span class="badge badge-purple">HR</span><span class="badge badge-teal">Employee</span></div>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-spine"><div class="flow-dot badge-green">6</div><div class="flow-line"></div></div>
+          <div class="flow-body">
+            <div class="flow-title">Full &amp; final settlement</div>
+            <div class="flow-detail">After all clearances are green, Finance calculates F&amp;F: pending salary (pro-rated), leave encashment, gratuity, deductions (notice shortfall, pending loans, unreturned assets), variable pay per policy. Finance approves, HR countersigns. Payment released on settlement date.</div>
+            <div class="flow-actors"><span class="badge badge-coral">Finance</span><span class="badge badge-purple">HR</span></div>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-spine"><div class="flow-dot badge-gray">7</div></div>
+          <div class="flow-body">
+            <div class="flow-title">Document generation &amp; offboarding</div>
+            <div class="flow-detail">Auto-generated PDFs: Resignation acceptance, Experience certificate, Relieving letter, NOC, F&amp;F statement. Employee portal shows all documents for download. HR tags employee rehire eligibility. IT deactivates accounts. Exit status archived in system with full audit trail.</div>
+            <div class="flow-actors"><span class="badge badge-gray">System (auto)</span><span class="badge badge-purple">HR</span><span class="badge badge-teal">Employee (download)</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Exit types handled</div>
+      <div class="card-sub">Different departure scenarios with distinct workflow paths</div>
+      <div class="grid2">
+        <div>
+          <div class="section-label">Voluntary exits</div>
+          <div style="display:flex;flex-direction:column;gap:7px">
+            <div class="stat-chip"><span class="badge badge-teal">Resignation</span>Full workflow, notice period applies</div>
+            <div class="stat-chip"><span class="badge badge-teal">Retirement</span>Extended notice, gratuity mandatory</div>
+            <div class="stat-chip"><span class="badge badge-teal">Notice buyout</span>Employee pays to exit early</div>
+          </div>
+        </div>
+        <div>
+          <div class="section-label">Involuntary / special</div>
+          <div style="display:flex;flex-direction:column;gap:7px">
+            <div class="stat-chip"><span class="badge badge-red">Termination</span>HR-initiated, expedited clearance</div>
+            <div class="stat-chip"><span class="badge badge-red">Absconding</span>Separate flow, no notice period</div>
+            <div class="stat-chip"><span class="badge badge-amber">Layoff</span>Bulk processing, severance calc</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ===== SCHEMA ===== -->
+  <div id="tab-schema" class="panel">
+
+    <div class="schema-group">
+      <div class="schema-group-title"><span class="badge badge-teal">Core</span> User &amp; identity tables</div>
+
+      <div class="table-wrap">
+        <div class="table-header"><span class="table-name">employees</span><span class="table-desc">Master employee record — synced from HRMS</span><span class="badge badge-gray" style="margin-left:auto">master</span></div>
+        <div class="table-scroll"><table class="db-table">
+          <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td class="col-name">id</td><td class="col-type">UUID</td><td><span class="pk">PK</span></td><td>Primary identifier</td></tr>
+            <tr><td class="col-name">employee_code</td><td class="col-type">VARCHAR(20)</td><td></td><td>Company-assigned unique code</td></tr>
+            <tr><td class="col-name">full_name</td><td class="col-type">VARCHAR(150)</td><td></td><td></td></tr>
+            <tr><td class="col-name">email</td><td class="col-type">VARCHAR(200)</td><td></td><td>UNIQUE, work email</td></tr>
+            <tr><td class="col-name">department_id</td><td class="col-type">UUID</td><td><span class="fk">FK</span></td><td>→ departments.id</td></tr>
+            <tr><td class="col-name">manager_id</td><td class="col-type">UUID</td><td><span class="fk">FK</span></td><td>→ employees.id (self-ref)</td></tr>
+            <tr><td class="col-name">designation</td><td class="col-type">VARCHAR(100)</td><td></td><td></td></tr>
+            <tr><td class="col-name">employment_type</td><td class="col-type">ENUM</td><td></td><td>trainee | probationer | confirmed | contract</td></tr>
+            <tr><td class="col-name">date_of_joining</td><td class="col-type">DATE</td><td></td><td></td></tr>
+            <tr><td class="col-name">notice_period_days</td><td class="col-type">INTEGER</td><td></td><td>Derived from employment_type policy</td></tr>
+            <tr><td class="col-name">is_active</td><td class="col-type">BOOLEAN</td><td></td><td>Default TRUE; FALSE after offboarding</td></tr>
+            <tr><td class="col-name">rehire_eligible</td><td class="col-type">BOOLEAN</td><td></td><td>Set by HR at exit completion</td></tr>
+            <tr><td class="col-name">created_at</td><td class="col-type">TIMESTAMPTZ</td><td></td><td></td></tr>
+          </tbody>
+        </table></div>
+      </div>
+
+      <div class="table-wrap">
+        <div class="table-header"><span class="table-name">departments</span><span class="table-desc">Company departments including clearance departments</span></div>
+        <div class="table-scroll"><table class="db-table">
+          <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td class="col-name">id</td><td class="col-type">UUID</td><td><span class="pk">PK</span></td><td></td></tr>
+            <tr><td class="col-name">name</td><td class="col-type">VARCHAR(100)</td><td></td><td>IT, Finance, Admin, etc.</td></tr>
+            <tr><td class="col-name">hod_employee_id</td><td class="col-type">UUID</td><td><span class="fk">FK</span></td><td>→ employees.id</td></tr>
+            <tr><td class="col-name">is_clearance_dept</td><td class="col-type">BOOLEAN</td><td></td><td>Participates in clearance flow</td></tr>
+            <tr><td class="col-name">clearance_order</td><td class="col-type">INTEGER</td><td></td><td class="nullable">nullable; for sequential mode</td></tr>
+            <tr><td class="col-name">clearance_mode</td><td class="col-type">ENUM</td><td></td><td>parallel | sequential</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+
+      <div class="table-wrap">
+        <div class="table-header"><span class="table-name">user_roles</span><span class="table-desc">Role assignments per employee</span></div>
+        <div class="table-scroll"><table class="db-table">
+          <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td class="col-name">id</td><td class="col-type">UUID</td><td><span class="pk">PK</span></td><td></td></tr>
+            <tr><td class="col-name">employee_id</td><td class="col-type">UUID</td><td><span class="fk">FK</span></td><td>→ employees.id</td></tr>
+            <tr><td class="col-name">role</td><td class="col-type">ENUM</td><td></td><td>employee | manager | hr | hod | finance | super_admin</td></tr>
+            <tr><td class="col-name">department_id</td><td class="col-type">UUID</td><td><span class="fk">FK</span></td><td class="nullable">nullable; scope for HOD/finance</td></tr>
+            <tr><td class="col-name">assigned_at</td><td class="col-type">TIMESTAMPTZ</td><td></td><td></td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <div class="schema-group">
+      <div class="schema-group-title"><span class="badge badge-blue">Exit core</span> Resignation &amp; approval</div>
+
+      <div class="table-wrap">
+        <div class="table-header"><span class="table-name">exit_requests</span><span class="table-desc">Central table — one row per exit event</span><span class="badge badge-blue" style="margin-left:auto">primary</span></div>
+        <div class="table-scroll"><table class="db-table">
+          <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td class="col-name">id</td><td class="col-type">UUID</td><td><span class="pk">PK</span></td><td></td></tr>
+            <tr><td class="col-name">request_number</td><td class="col-type">VARCHAR(20)</td><td></td><td>Human-readable, e.g. EXT-2024-0042</td></tr>
+            <tr><td class="col-name">employee_id</td><td class="col-type">UUID</td><td><span class="fk">FK</span></td><td>→ employees.id</td></tr>
+            <tr><td class="col-name">initiated_by</td><td class="col-type">UUID</td><td><span class="fk">FK</span></td><td>→ employees.id (self or manager)</td></tr>
+            <tr><td class="col-name">exit_type</td><td class="col-type">ENUM</td><td></td><td>resignation | retirement | termination | absconding | layoff</td></tr>
+            <tr><td class="col-name">exit_reason_category</td><td class="col-type">ENUM</td><td></td><td>better_opportunity | personal | relocation | compensation | growth | health | other</td></tr>
+            <tr><td class="col-name">exit_reason_text</td><td class="col-type">TEXT</td><td></td><td class="nullable">nullable; free text</td></tr>
+            <tr><td class="col-name">resignation_date</td><td class="col-type">DATE</td><td></td><td>Date employee submitted</td></tr>
+            <tr><td class="col-name">preferred_lwd</td><td class="col-type">DATE</td><td></td><td>Employee's requested last working day</td></tr>
+            <tr><td class="col-name">policy_lwd</td><td class="col-type">DATE</td><td></td><td>System-calculated based on notice period</td></tr>
+            <tr><td class="col-name">approved_lwd</td><td class="col-type">DATE</td><td></td><td class="nullable">nullable; final agreed date</td></tr>
+            <tr><td class="col-name">status</td><td class="col-type">ENUM</td><td></td><td>draft | pending_manager | pending_hr | approved | rejected | withdrawn | completed</td></tr>
+            <tr><td class="col-name">current_stage</td><td class="col-type">ENUM</td><td></td><td>approval | kt | clearance | interview | settlement | documents | closed</td></tr>
+            <tr><td class="col-name">notice_buyout_days</td><td class="col-type">INTEGER</td><td></td><td class="nullable">nullable; days bought out</td></tr>
+            <tr><td class="col-name">buyout_amount</td><td class="col-type">NUMERIC(12,2)</td><td></td><td class="nullable">nullable</td></tr>
+            <tr><td class="col-name">withdrawal_deadline</td><td class="col-type">TIMESTAMPTZ</td><td></td><td class="nullable">nullable; configurable window</td></tr>
+            <tr><td class="col-name">created_at</td><td class="col-type">TIMESTAMPTZ</td><td></td><td></td></tr>
+            <tr><td class="col-name">updated_at</td><td class="col-type">TIMESTAMPTZ</td><td></td><td></td></tr>
+          </tbody>
+        </table></div>
+      </div>
+
+      <div class="table-wrap">
+        <div class="table-header"><span class="table-name">exit_approvals</span><span class="table-desc">Approval chain steps — one row per approver per request</span></div>
+        <div class="table-scroll"><table class="db-table">
+          <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td class="col-name">id</td><td class="col-type">UUID</td><td><span class="pk">PK</span></td><td></td></tr>
+            <tr><td class="col-name">exit_request_id</td><td class="col-type">UUID</td><td><span class="fk">FK</span></td><td>→ exit_requests.id</td></tr>
+            <tr><td class="col-name">approver_id</td><td class="col-type">UUID</td><td><span class="fk">FK</span></td><td>→ employees.id</td></tr>
+            <tr><td class="col-name">approver_role</td><td class="col-type">ENUM</td><td></td><td>manager | bu_head | hr</td></tr>
+            <tr><td class="col-name">step_order</td><td class="col-type">INTEGER</td><td></td><td>1, 2, 3...</td></tr>
+            <tr><td class="col-name">status</td><td class="col-type">ENUM</td><td></td><td>pending | approved | rejected | skipped</td></tr>
+            <tr><td class="col-name">remarks</td><td class="col-type">TEXT</td><td></td><td class="nullable">nullable</td></tr>
+            <tr><td class="col-name">sla_deadline</td><td class="col-type">TIMESTAMPTZ</td><td></td><td>Auto-escalate after this</td></tr>
+            <tr><td class="col-name">acted_at</td><td class="col-type">TIMESTAMPTZ</td><td></td><td class="nullable">nullable</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <div class="schema-group">
+      <div class="schema-group-title"><span class="badge badge-amber">Operations</span> Knowledge transfer &amp; clearance</div>
+
+      <div class="table-wrap">
+        <div class="table-header"><span class="table-name">kt_tasks</span><span class="table-desc">Knowledge transfer assignments</span></div>
+        <div class="table-scroll"><table class="db-table">
+          <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td class="col-name">id</td><td class="col-type">UUID</td><td><span class="pk">PK</span></td><td></td></tr>
+            <tr><td class="col-name">exit_request_id</td><td class="col-type">UUID</td><td><span class="fk">FK</span></td><td>→ exit_requests.id</td></tr>
+            <tr><td class="col-name">assigned_to</td><td class="col-type">UUID</td><td><span class="fk">FK</span></td><td>→ employees.id (exiting employee)</td></tr>
+            <tr><td class="col-name">assigned_by</td><td class="col-type">UUID</td><td><span class="fk">FK</span></td><td>→ employees.id (manager)</td></tr>
+            <tr><td class="col-name">successor_id</td><td class="col-type">UUID</td><td><span class="fk">FK</span></td><td class="nullable">nullable; → employees.id</td></tr>
+            <tr><td class="col-name">title</td><td class="col-type">VARCHAR(200)</td><td></td><td></td></tr>
+            <tr><td class="col-name">description</td><td class="col-type">TEXT</td><td></td><td class="nullable">nullable</td></tr>
+            <tr><td class="col-name">due_date</td><td class="col-type">DATE</td><td></td><td></td></tr>
+            <tr><td class="col-name">status</td><td class="col-type">ENUM</td><td></td><td>pending | in_progress | submitted | approved | rejected</td></tr>
+            <tr><td class="col-name">manager_confirmed_at</td><td class="col-type">TIMESTAMPTZ</td><td></td><td class="nullable">nullable</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+
+      <div class="table-wrap">
+        <div class="table-header"><span class="table-name">kt_documents</span><span class="table-desc">Files uploaded for each KT task</span></div>
+        <div class="table-scroll"><table class="db-table">
+          <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td class="col-name">id</td><td class="col-type">UUID</td><td><span class="pk">PK</span></td><td></td></tr>
+            <tr><td class="col-name">kt_task_id</td><td class="col-type">UUID</td><td><span class="fk">FK</span></td><td>→ kt_tasks.id</td></tr>
+            <tr><td class="col-name">uploaded_by</td><td class="col-type">UUID</td><td><span class="fk">FK</span></td><td>→ employees.id</td></tr>
+            <tr><td class="col-name">file_name</td><td class="col-type">VARCHAR(255)</td><td></td><td></td></tr>
+            <tr><td class="col-name">file_url</td><td class="col-type">TEXT</td><td></td><td>S3/storage path</td></tr>
+            <tr><td class="col-name">uploaded_at</td><td class="col-type">TIMESTAMPTZ</td><td></td><td></td></tr>
+          </tbody>
+        </table></div>
+      </div>
+
+      <div class="table-wrap">
+        <div class="table-header"><span class="table-name">clearance_requests</span><span class="table-desc">One row per department per exit request</span></div>
+        <div class="table-scroll"><table class="db-table">
+          <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td class="col-name">id</td><td class="col-type">UUID</td><td><span class="pk">PK</span></td><td></td></tr>
+            <tr><td class="col-name">exit_request_id</td><td class="col-type">UUID</td><td><span class="fk">FK</span></td><td>→ exit_requests.id</td></tr>
+            <tr><td class="col-name">department_id</td><td class="col-type">UUID</td><td><span class="fk">FK</span></td><td>→ departments.id</td></tr>
+            <tr><td class="col-name">assigned_to</td><td class="col-type">UUID</td><td><span class="fk">FK</span></td><td>→ employees.id (HOD)</td></tr>
+            <tr><td class="col-name">status</td><td class="col-type">ENUM</td><td></td><td>pending | cleared | rejected | on_hold</td></tr>
+            <tr><td class="col-name">remarks</td><td class="col-type">TEXT</td><td></td><td class="nullable">nullable; reason for rejection</td></tr>
+            <tr><td class="col-name">cleared_at</td><td class="col-type">TIMESTAMPTZ</td><td></td><td class="nullable">nullable</td></tr>
+            <tr><td class="col-name">sla_deadline</td><td class="col-type">TIMESTAMPTZ</td><td></td><td></td></tr>
+          </tbody>
+        </table></div>
+      </div>
+
+      <div class="table-wrap">
+        <div class="table-header"><span class="table-name">clearance_checklist_items</span><span class="table-desc">Granular items within each department clearance</span></div>
+        <div class="table-scroll"><table class="db-table">
+          <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td class="col-name">id</td><td class="col-type">UUID</td><td><span class="pk">PK</span></td><td></td></tr>
+            <tr><td class="col-name">clearance_request_id</td><td class="col-type">UUID</td><td><span class="fk">FK</span></td><td>→ clearance_requests.id</td></tr>
+            <tr><td class="col-name">item_label</td><td class="col-type">VARCHAR(200)</td><td></td><td>e.g. "Laptop returned", "VPN access revoked"</td></tr>
+            <tr><td class="col-name">is_mandatory</td><td class="col-type">BOOLEAN</td><td></td><td>Mandatory items block clearance sign-off</td></tr>
+            <tr><td class="col-name">is_checked</td><td class="col-type">BOOLEAN</td><td></td><td>Default FALSE</td></tr>
+            <tr><td class="col-name">checked_at</td><td class="col-type">TIMESTAMPTZ</td><td></td><td class="nullable">nullable</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <div class="schema-group">
+      <div class="schema-group-title"><span class="badge badge-purple">Feedback</span> Exit interview &amp; survey</div>
+
+      <div class="table-wrap">
+        <div class="table-header"><span class="table-name">exit_interviews</span><span class="table-desc">Interview scheduling and completion record</span></div>
+        <div class="table-scroll"><table class="db-table">
+          <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td class="col-name">id</td><td class="col-type">UUID</td><td><span class="pk">PK</span></td><td></td></tr>
+            <tr><td class="col-name">exit_request_id</td><td class="col-type">UUID</td><td><span class="fk">FK</span></td><td>→ exit_requests.id</td></tr>
+            <tr><td class="col-name">hr_interviewer_id</td><td class="col-type">UUID</td><td><span class="fk">FK</span></td><td>→ employees.id</td></tr>
+            <tr><td class="col-name">scheduled_at</td><td class="col-type">TIMESTAMPTZ</td><td></td><td></td></tr>
+            <tr><td class="col-name">mode</td><td class="col-type">ENUM</td><td></td><td>in_person | video | phone</td></tr>
+            <tr><td class="col-name">status</td><td class="col-type">ENUM</td><td></td><td>scheduled | completed | cancelled | skipped</td></tr>
+            <tr><td class="col-name">hr_notes</td><td class="col-type">TEXT</td><td></td><td class="nullable">nullable; visible to HR only</td></tr>
+            <tr><td class="col-name">completed_at</td><td class="col-type">TIMESTAMPTZ</td><td></td><td class="nullable">nullable</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+
+      <div class="table-wrap">
+        <div class="table-header"><span class="table-name">exit_survey_responses</span><span class="table-desc">Anonymous survey answers per exit request</span></div>
+        <div class="table-scroll"><table class="db-table">
+          <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td class="col-name">id</td><td class="col-type">UUID</td><td><span class="pk">PK</span></td><td></td></tr>
+            <tr><td class="col-name">exit_request_id</td><td class="col-type">UUID</td><td><span class="fk">FK</span></td><td>→ exit_requests.id</td></tr>
+            <tr><td class="col-name">is_anonymous</td><td class="col-type">BOOLEAN</td><td></td><td>If true, employee_id is hidden from reports</td></tr>
+            <tr><td class="col-name">work_culture_rating</td><td class="col-type">SMALLINT</td><td></td><td>1–5 scale</td></tr>
+            <tr><td class="col-name">manager_rating</td><td class="col-type">SMALLINT</td><td></td><td>1–5 scale</td></tr>
+            <tr><td class="col-name">compensation_rating</td><td class="col-type">SMALLINT</td><td></td><td>1–5 scale</td></tr>
+            <tr><td class="col-name">growth_rating</td><td class="col-type">SMALLINT</td><td></td><td>1–5 scale</td></tr>
+            <tr><td class="col-name">wlb_rating</td><td class="col-type">SMALLINT</td><td></td><td>1–5 scale (work-life balance)</td></tr>
+            <tr><td class="col-name">primary_reason</td><td class="col-type">ENUM</td><td></td><td>Matches exit_reason_category</td></tr>
+            <tr><td class="col-name">would_return</td><td class="col-type">BOOLEAN</td><td></td><td class="nullable">nullable</td></tr>
+            <tr><td class="col-name">open_feedback</td><td class="col-type">TEXT</td><td></td><td class="nullable">nullable; free text</td></tr>
+            <tr><td class="col-name">submitted_at</td><td class="col-type">TIMESTAMPTZ</td><td></td><td class="nullable">nullable</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <div class="schema-group">
+      <div class="schema-group-title"><span class="badge badge-coral">Finance</span> Full &amp; final settlement</div>
+
+      <div class="table-wrap">
+        <div class="table-header"><span class="table-name">fnf_settlements</span><span class="table-desc">Full and final settlement calculation &amp; approval</span><span class="badge badge-coral" style="margin-left:auto">financial</span></div>
+        <div class="table-scroll"><table class="db-table">
+          <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td class="col-name">id</td><td class="col-type">UUID</td><td><span class="pk">PK</span></td><td></td></tr>
+            <tr><td class="col-name">exit_request_id</td><td class="col-type">UUID</td><td><span class="fk">FK</span></td><td>→ exit_requests.id, UNIQUE</td></tr>
+            <tr><td class="col-name">calculated_by</td><td class="col-type">UUID</td><td><span class="fk">FK</span></td><td>→ employees.id (finance team)</td></tr>
+            <tr><td class="col-name">pending_salary</td><td class="col-type">NUMERIC(12,2)</td><td></td><td>Pro-rated for partial month</td></tr>
+            <tr><td class="col-name">leave_encashment</td><td class="col-type">NUMERIC(12,2)</td><td></td><td></td></tr>
+            <tr><td class="col-name">gratuity_amount</td><td class="col-type">NUMERIC(12,2)</td><td></td><td>0 if tenure &lt; 5 years (configurable)</td></tr>
+            <tr><td class="col-name">variable_pay</td><td class="col-type">NUMERIC(12,2)</td><td></td><td class="nullable">nullable</td></tr>
+            <tr><td class="col-name">notice_shortfall_deduction</td><td class="col-type">NUMERIC(12,2)</td><td></td><td>Days short of notice × daily rate</td></tr>
+            <tr><td class="col-name">loan_deduction</td><td class="col-type">NUMERIC(12,2)</td><td></td><td>Pending salary advances / loans</td></tr>
+            <tr><td class="col-name">asset_deduction</td><td class="col-type">NUMERIC(12,2)</td><td></td><td>Value of unreturned company assets</td></tr>
+            <tr><td class="col-name">other_deductions</td><td class="col-type">NUMERIC(12,2)</td><td></td><td></td></tr>
+            <tr><td class="col-name">gross_payable</td><td class="col-type">NUMERIC(12,2)</td><td></td><td>Sum of earnings</td></tr>
+            <tr><td class="col-name">total_deductions</td><td class="col-type">NUMERIC(12,2)</td><td></td><td></td></tr>
+            <tr><td class="col-name">net_payable</td><td class="col-type">NUMERIC(12,2)</td><td></td><td>gross_payable − total_deductions</td></tr>
+            <tr><td class="col-name">status</td><td class="col-type">ENUM</td><td></td><td>draft | pending_approval | approved | paid | disputed</td></tr>
+            <tr><td class="col-name">approved_by</td><td class="col-type">UUID</td><td><span class="fk">FK</span></td><td class="nullable">nullable; → employees.id (HR)</td></tr>
+            <tr><td class="col-name">payment_date</td><td class="col-type">DATE</td><td></td><td class="nullable">nullable</td></tr>
+            <tr><td class="col-name">calculated_at</td><td class="col-type">TIMESTAMPTZ</td><td></td><td></td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <div class="schema-group">
+      <div class="schema-group-title"><span class="badge badge-gray">System</span> Documents, notifications &amp; audit</div>
+
+      <div class="grid2">
+        <div class="table-wrap">
+          <div class="table-header"><span class="table-name">exit_documents</span><span class="table-desc">Generated letters &amp; certificates</span></div>
+          <div class="table-scroll"><table class="db-table">
+            <thead><tr><th>Column</th><th>Type</th><th>Key</th></tr></thead>
+            <tbody>
+              <tr><td class="col-name">id</td><td class="col-type">UUID</td><td><span class="pk">PK</span></td></tr>
+              <tr><td class="col-name">exit_request_id</td><td class="col-type">UUID</td><td><span class="fk">FK</span></td></tr>
+              <tr><td class="col-name">document_type</td><td class="col-type">ENUM</td><td></td></tr>
+              <tr><td class="col-name">generated_by</td><td class="col-type">UUID</td><td><span class="fk">FK</span></td></tr>
+              <tr><td class="col-name">file_url</td><td class="col-type">TEXT</td><td></td></tr>
+              <tr><td class="col-name">generated_at</td><td class="col-type">TIMESTAMPTZ</td><td></td></tr>
+              <tr><td class="col-name">is_active</td><td class="col-type">BOOLEAN</td><td></td></tr>
+            </tbody>
+          </table></div>
+          <div style="padding:8px 14px;font-size:11px;color:var(--text3)">Types: resignation_acceptance · experience_certificate · relieving_letter · noc · fnf_statement</div>
+        </div>
+
+        <div class="table-wrap">
+          <div class="table-header"><span class="table-name">audit_logs</span><span class="table-desc">Immutable event trail</span></div>
+          <div class="table-scroll"><table class="db-table">
+            <thead><tr><th>Column</th><th>Type</th><th>Key</th></tr></thead>
+            <tbody>
+              <tr><td class="col-name">id</td><td class="col-type">BIGSERIAL</td><td><span class="pk">PK</span></td></tr>
+              <tr><td class="col-name">exit_request_id</td><td class="col-type">UUID</td><td><span class="fk">FK</span></td></tr>
+              <tr><td class="col-name">actor_id</td><td class="col-type">UUID</td><td><span class="fk">FK</span></td></tr>
+              <tr><td class="col-name">action</td><td class="col-type">VARCHAR(100)</td><td></td></tr>
+              <tr><td class="col-name">entity_type</td><td class="col-type">VARCHAR(50)</td><td></td></tr>
+              <tr><td class="col-name">entity_id</td><td class="col-type">UUID</td><td></td></tr>
+              <tr><td class="col-name">old_value</td><td class="col-type">JSONB</td><td></td></tr>
+              <tr><td class="col-name">new_value</td><td class="col-type">JSONB</td><td></td></tr>
+              <tr><td class="col-name">ip_address</td><td class="col-type">INET</td><td></td></tr>
+              <tr><td class="col-name">created_at</td><td class="col-type">TIMESTAMPTZ</td><td></td></tr>
+            </tbody>
+          </table></div>
+        </div>
+      </div>
+
+      <div class="table-wrap" style="margin-top:12px">
+        <div class="table-header"><span class="table-name">notifications</span><span class="table-desc">In-app and email notification queue</span></div>
+        <div class="table-scroll"><table class="db-table">
+          <thead><tr><th>Column</th><th>Type</th><th>Key</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td class="col-name">id</td><td class="col-type">UUID</td><td><span class="pk">PK</span></td><td></td></tr>
+            <tr><td class="col-name">recipient_id</td><td class="col-type">UUID</td><td><span class="fk">FK</span></td><td>→ employees.id</td></tr>
+            <tr><td class="col-name">exit_request_id</td><td class="col-type">UUID</td><td><span class="fk">FK</span></td><td class="nullable">nullable</td></tr>
+            <tr><td class="col-name">type</td><td class="col-type">ENUM</td><td></td><td>approval_pending | clearance_assigned | sla_breach | fnf_ready | document_ready | etc.</td></tr>
+            <tr><td class="col-name">channel</td><td class="col-type">ENUM</td><td></td><td>email | in_app | both</td></tr>
+            <tr><td class="col-name">is_read</td><td class="col-type">BOOLEAN</td><td></td><td></td></tr>
+            <tr><td class="col-name">sent_at</td><td class="col-type">TIMESTAMPTZ</td><td></td><td class="nullable">nullable</td></tr>
+            <tr><td class="col-name">created_at</td><td class="col-type">TIMESTAMPTZ</td><td></td><td></td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Recommended indexes</div>
+      <div class="card-sub">Critical for performance at MNC scale</div>
+      <div>
+        <span class="index-pill">exit_requests(employee_id)</span>
+        <span class="index-pill">exit_requests(status)</span>
+        <span class="index-pill">exit_requests(current_stage)</span>
+        <span class="index-pill">exit_requests(approved_lwd)</span>
+        <span class="index-pill">exit_approvals(exit_request_id, step_order)</span>
+        <span class="index-pill">clearance_requests(exit_request_id)</span>
+        <span class="index-pill">clearance_requests(assigned_to, status)</span>
+        <span class="index-pill">kt_tasks(exit_request_id)</span>
+        <span class="index-pill">audit_logs(exit_request_id)</span>
+        <span class="index-pill">audit_logs(actor_id, created_at)</span>
+        <span class="index-pill">notifications(recipient_id, is_read)</span>
+        <span class="index-pill">fnf_settlements(exit_request_id)</span>
+        <span class="index-pill">exit_survey_responses(work_culture_rating)</span>
+        <span class="index-pill">employees(department_id)</span>
+        <span class="index-pill">employees(manager_id)</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ===== API ===== -->
+  <div id="tab-api" class="panel">
+
+    <div class="card">
+      <div class="card-title">API conventions</div>
+      <div class="grid2" style="margin-top:12px;gap:12px">
+        <div>
+          <div class="section-label">Base URL</div>
+          <pre style="margin:4px 0">/api/v1</pre>
+          <div class="section-label" style="margin-top:12px">Auth</div>
+          <pre style="margin:4px 0">Authorization: Bearer &lt;JWT&gt;</pre>
+        </div>
+        <div>
+          <div class="section-label">Standard response</div>
+          <pre style="margin:4px 0">{
+  "success": true,
+  "data": { ... },
+  "meta": { "page": 1, "total": 42 },
+  "message": "Optional message"
+}</pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Exit requests</div>
+      <div class="card-sub">Core resignation lifecycle endpoints</div>
+      <div class="route"><span class="method POST">POST</span><div><div class="route-path">/exit-requests</div><div class="route-desc">Submit a new resignation. Body: exit_type, exit_reason_category, preferred_lwd, exit_reason_text. System calculates policy_lwd.</div><div class="route-roles"><span class="badge badge-teal">employee</span><span class="badge badge-blue">manager</span><span class="badge badge-purple">hr</span></div></div></div>
+      <div class="route"><span class="method GET">GET</span><div><div class="route-path">/exit-requests</div><div class="route-desc">List exit requests. Filters: status, stage, department_id, exit_type, date_from, date_to. Paginated. HR sees all; managers see team; employee sees own.</div><div class="route-roles"><span class="badge badge-purple">hr</span><span class="badge badge-blue">manager</span><span class="badge badge-teal">employee (own)</span></div></div></div>
+      <div class="route"><span class="method GET">GET</span><div><div class="route-path">/exit-requests/:id</div><div class="route-desc">Full exit request detail with approval chain, clearance statuses, KT tasks, and F&amp;F summary.</div><div class="route-roles"><span class="badge badge-purple">hr</span><span class="badge badge-blue">manager</span><span class="badge badge-teal">employee (own)</span></div></div></div>
+      <div class="route"><span class="method PATCH">PATCH</span><div><div class="route-path">/exit-requests/:id/approve</div><div class="route-desc">Approve at current step. Body: remarks, approved_lwd (HR only). Advances workflow to next stage or approver.</div><div class="route-roles"><span class="badge badge-blue">manager</span><span class="badge badge-purple">hr</span></div></div></div>
+      <div class="route"><span class="method PATCH">PATCH</span><div><div class="route-path">/exit-requests/:id/reject</div><div class="route-desc">Reject with mandatory reason. Notifies employee. Body: remarks.</div><div class="route-roles"><span class="badge badge-blue">manager</span><span class="badge badge-purple">hr</span></div></div></div>
+      <div class="route"><span class="method PATCH">PATCH</span><div><div class="route-path">/exit-requests/:id/withdraw</div><div class="route-desc">Employee withdraws resignation (within withdrawal_deadline). Status → withdrawn.</div><div class="route-roles"><span class="badge badge-teal">employee</span></div></div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Clearances</div>
+      <div class="card-sub">Department-level clearance management</div>
+      <div class="route"><span class="method GET">GET</span><div><div class="route-path">/exit-requests/:id/clearances</div><div class="route-desc">All department clearance statuses for an exit request. Shows overall completion percentage.</div><div class="route-roles"><span class="badge badge-purple">hr</span><span class="badge badge-blue">manager</span><span class="badge badge-teal">employee (own)</span></div></div></div>
+      <div class="route"><span class="method PATCH">PATCH</span><div><div class="route-path">/clearances/:clearanceId/clear</div><div class="route-desc">HOD marks department clearance as cleared. Body: remarks, checklist item updates.</div><div class="route-roles"><span class="badge badge-amber">hod</span></div></div></div>
+      <div class="route"><span class="method PATCH">PATCH</span><div><div class="route-path">/clearances/:clearanceId/reject</div><div class="route-desc">HOD flags clearance as rejected with reason. Notifies HR and employee. Body: remarks.</div><div class="route-roles"><span class="badge badge-amber">hod</span></div></div></div>
+      <div class="route"><span class="method GET">GET</span><div><div class="route-path">/clearances/pending</div><div class="route-desc">All clearances pending for the authenticated HOD's department. Sorted by SLA deadline.</div><div class="route-roles"><span class="badge badge-amber">hod</span></div></div></div>
+      <div class="route"><span class="method PUT">PUT</span><div><div class="route-path">/clearances/:clearanceId/checklist</div><div class="route-desc">Bulk update checklist item statuses. Body: array of { item_id, is_checked }.</div><div class="route-roles"><span class="badge badge-amber">hod</span></div></div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Knowledge transfer</div>
+      <div class="card-sub">Task assignment and document upload</div>
+      <div class="route"><span class="method POST">POST</span><div><div class="route-path">/exit-requests/:id/kt-tasks</div><div class="route-desc">Assign a new KT task. Body: title, description, due_date, successor_id.</div><div class="route-roles"><span class="badge badge-blue">manager</span></div></div></div>
+      <div class="route"><span class="method GET">GET</span><div><div class="route-path">/exit-requests/:id/kt-tasks</div><div class="route-desc">List all KT tasks with status and completion percentage for an exit request.</div><div class="route-roles"><span class="badge badge-blue">manager</span><span class="badge badge-teal">employee</span><span class="badge badge-purple">hr</span></div></div></div>
+      <div class="route"><span class="method PATCH">PATCH</span><div><div class="route-path">/kt-tasks/:taskId/submit</div><div class="route-desc">Employee marks task as submitted (done). Triggers manager notification.</div><div class="route-roles"><span class="badge badge-teal">employee</span></div></div></div>
+      <div class="route"><span class="method PATCH">PATCH</span><div><div class="route-path">/kt-tasks/:taskId/confirm</div><div class="route-desc">Manager confirms KT task is satisfactorily completed.</div><div class="route-roles"><span class="badge badge-blue">manager</span></div></div></div>
+      <div class="route"><span class="method POST">POST</span><div><div class="route-path">/kt-tasks/:taskId/documents</div><div class="route-desc">Upload a document for a KT task. multipart/form-data. Returns signed file URL.</div><div class="route-roles"><span class="badge badge-teal">employee</span></div></div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Full &amp; final settlement</div>
+      <div class="card-sub">Finance calculation and approval flow</div>
+      <div class="route"><span class="method POST">POST</span><div><div class="route-path">/exit-requests/:id/fnf</div><div class="route-desc">Create F&amp;F calculation draft. Body: all earning/deduction fields. Status → draft. Available only after all clearances cleared.</div><div class="route-roles"><span class="badge badge-coral">finance</span></div></div></div>
+      <div class="route"><span class="method GET">GET</span><div><div class="route-path">/exit-requests/:id/fnf</div><div class="route-desc">Get F&amp;F breakdown with itemized earnings, deductions, and net payable. Employee sees read-only view.</div><div class="route-roles"><span class="badge badge-coral">finance</span><span class="badge badge-purple">hr</span><span class="badge badge-teal">employee</span></div></div></div>
+      <div class="route"><span class="method PUT">PUT</span><div><div class="route-path">/fnf/:fnfId</div><div class="route-desc">Update F&amp;F draft. Body: any earning/deduction fields. Recalculates net_payable automatically.</div><div class="route-roles"><span class="badge badge-coral">finance</span></div></div></div>
+      <div class="route"><span class="method PATCH">PATCH</span><div><div class="route-path">/fnf/:fnfId/submit</div><div class="route-desc">Finance submits F&amp;F for HR approval. Status → pending_approval.</div><div class="route-roles"><span class="badge badge-coral">finance</span></div></div></div>
+      <div class="route"><span class="method PATCH">PATCH</span><div><div class="route-path">/fnf/:fnfId/approve</div><div class="route-desc">HR approves and confirms payment date. Status → approved. Body: payment_date.</div><div class="route-roles"><span class="badge badge-purple">hr</span></div></div></div>
+      <div class="route"><span class="method PATCH">PATCH</span><div><div class="route-path">/fnf/:fnfId/mark-paid</div><div class="route-desc">Finance marks payment as released. Triggers document generation. Status → paid.</div><div class="route-roles"><span class="badge badge-coral">finance</span></div></div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Exit interview &amp; survey</div>
+      <div class="route"><span class="method POST">POST</span><div><div class="route-path">/exit-requests/:id/interview</div><div class="route-desc">Schedule exit interview. Body: scheduled_at, mode (in_person | video | phone).</div><div class="route-roles"><span class="badge badge-purple">hr</span></div></div></div>
+      <div class="route"><span class="method PATCH">PATCH</span><div><div class="route-path">/interviews/:interviewId/complete</div><div class="route-desc">Mark interview complete and add HR notes. Body: hr_notes. Notes are HR-only.</div><div class="route-roles"><span class="badge badge-purple">hr</span></div></div></div>
+      <div class="route"><span class="method POST">POST</span><div><div class="route-path">/exit-requests/:id/survey</div><div class="route-desc">Submit exit survey. Body: all rating fields + is_anonymous + open_feedback. One submission per exit request.</div><div class="route-roles"><span class="badge badge-teal">employee</span></div></div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Document generation</div>
+      <div class="route"><span class="method POST">POST</span><div><div class="route-path">/exit-requests/:id/documents/generate</div><div class="route-desc">Trigger PDF generation for a specific document type. Body: document_type. Queued via BullMQ job.</div><div class="route-roles"><span class="badge badge-purple">hr</span></div></div></div>
+      <div class="route"><span class="method GET">GET</span><div><div class="route-path">/exit-requests/:id/documents</div><div class="route-desc">List all generated documents with signed download URLs. Employee can access own documents after exit is complete.</div><div class="route-roles"><span class="badge badge-purple">hr</span><span class="badge badge-teal">employee (own)</span></div></div></div>
+      <div class="route"><span class="method GET">GET</span><div><div class="route-path">/exit-requests/:id/documents/:docId/download</div><div class="route-desc">Get pre-signed URL for document download (expires in 15 min).</div><div class="route-roles"><span class="badge badge-purple">hr</span><span class="badge badge-teal">employee (own)</span></div></div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Analytics &amp; reporting</div>
+      <div class="card-sub">HR leadership dashboard endpoints</div>
+      <div class="route"><span class="method GET">GET</span><div><div class="route-path">/analytics/attrition</div><div class="route-desc">Attrition rate by department/month/exit_type. Query params: period (monthly | quarterly | yearly), year, department_id.</div><div class="route-roles"><span class="badge badge-purple">hr</span><span class="badge badge-gray">super_admin</span></div></div></div>
+      <div class="route"><span class="method GET">GET</span><div><div class="route-path">/analytics/exit-reasons</div><div class="route-desc">Aggregated exit reason distribution. Returns percentage breakdown by category for charting.</div><div class="route-roles"><span class="badge badge-purple">hr</span></div></div></div>
+      <div class="route"><span class="method GET">GET</span><div><div class="route-path">/analytics/survey-sentiment</div><div class="route-desc">Average ratings per category over time. Filters: department, exit_type, date_range.</div><div class="route-roles"><span class="badge badge-purple">hr</span></div></div></div>
+      <div class="route"><span class="method GET">GET</span><div><div class="route-path">/analytics/clearance-turnaround</div><div class="route-desc">Average clearance completion time per department. Identifies bottlenecks.</div><div class="route-roles"><span class="badge badge-purple">hr</span><span class="badge badge-gray">super_admin</span></div></div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Admin &amp; configuration</div>
+      <div class="route"><span class="method GET">GET</span><div><div class="route-path">/admin/notice-policies</div><div class="route-desc">List notice period policies by employment type.</div><div class="route-roles"><span class="badge badge-gray">super_admin</span></div></div></div>
+      <div class="route"><span class="method PUT">PUT</span><div><div class="route-path">/admin/notice-policies/:id</div><div class="route-desc">Update notice period days for an employment type.</div><div class="route-roles"><span class="badge badge-gray">super_admin</span></div></div></div>
+      <div class="route"><span class="method GET">GET</span><div><div class="route-path">/admin/audit-logs</div><div class="route-desc">Query immutable audit trail. Filters: exit_request_id, actor_id, action, date_range.</div><div class="route-roles"><span class="badge badge-gray">super_admin</span><span class="badge badge-purple">hr</span></div></div></div>
+      <div class="route"><span class="method GET">GET</span><div><div class="route-path">/notifications</div><div class="route-desc">In-app notifications for authenticated user. Query: is_read, limit.</div><div class="route-roles"><span class="badge badge-teal">all roles</span></div></div></div>
+      <div class="route"><span class="method PATCH">PATCH</span><div><div class="route-path">/notifications/:id/read</div><div class="route-desc">Mark notification as read.</div><div class="route-roles"><span class="badge badge-teal">all roles</span></div></div></div>
+    </div>
+
+  </div>
+
+  <!-- ===== ARCH ===== -->
+  <div id="tab-arch" class="panel">
+
+    <div class="card">
+      <div class="card-title">Tech stack</div>
+      <div class="grid3" style="gap:12px;margin-top:12px">
+        <div style="border:1px solid var(--border);border-radius:var(--radius);padding:16px;background:var(--grad-soft)">
+          <div class="section-label" style="margin-top:0">Frontend</div>
+          <div style="font-size:13px;line-height:2">React + TypeScript<br>Tailwind CSS<br>React Query (server state)<br>Zustand (UI state)<br>React Router v6<br>React Hook Form + Zod</div>
+        </div>
+        <div style="border:1px solid var(--border);border-radius:var(--radius);padding:16px;background:var(--grad-soft)">
+          <div class="section-label" style="margin-top:0">Backend</div>
+          <div style="font-size:13px;line-height:2">Node.js + Express<br>JWT (access + refresh)<br>Zod (input validation)<br>Multer (file uploads)<br>Nodemailer (email)<br>Puppeteer (PDF gen)</div>
+        </div>
+        <div style="border:1px solid var(--border);border-radius:var(--radius);padding:16px;background:var(--grad-soft)">
+          <div class="section-label" style="margin-top:0">Infrastructure</div>
+          <div style="font-size:13px;line-height:2">PostgreSQL 15 (primary DB)<br>Redis (cache + sessions)<br>BullMQ (async jobs)<br>AWS S3 (file storage)<br>Docker + Docker Compose<br>PM2 / nginx</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">BullMQ job queues</div>
+      <div class="card-sub">Async jobs that run in the background via Redis</div>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:4px">
+        <div class="route"><span class="badge badge-blue" style="flex-shrink:0;white-space:nowrap">email-queue</span><div class="route-desc">Sends all email notifications — approval requests, SLA breach alerts, F&amp;F ready, document generated. Retries 3× on failure.</div></div>
+        <div class="route"><span class="badge badge-purple" style="flex-shrink:0;white-space:nowrap">pdf-queue</span><div class="route-desc">Generates PDFs using Puppeteer (relieving letter, F&amp;F statement, etc.). Uploads to S3. Updates exit_documents table on completion.</div></div>
+        <div class="route"><span class="badge badge-amber" style="flex-shrink:0;white-space:nowrap">sla-queue</span><div class="route-desc">Scheduled cron job (every 30 min) checks approval and clearance SLA deadlines. Escalates and fires breach notifications.</div></div>
+        <div class="route"><span class="badge badge-coral" style="flex-shrink:0;white-space:nowrap">access-revoke-queue</span><div class="route-desc">Scheduled to run on approved_lwd. Triggers webhook/API calls to IT systems (Active Directory, GitHub, Jira) to revoke access.</div></div>
+        <div class="route"><span class="badge badge-teal" style="flex-shrink:0;white-space:nowrap">clearance-init-queue</span><div class="route-desc">When approval is granted, bulk-creates clearance_requests for all is_clearance_dept departments and fires initial notifications.</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Folder structure (Node.js/Express)</div>
+      <pre>src/
+├── config/          # DB, Redis, env, queue setup
+├── middleware/      # auth, rbac, error handler, logger
+├── modules/
+│   ├── auth/        # login, refresh, JWT
+│   ├── employees/   # employee CRUD + sync
+│   ├── exit/        # exit-requests controller + service
+│   ├── approvals/   # approval chain logic
+│   ├── clearance/   # department clearance
+│   ├── kt/          # knowledge transfer tasks
+│   ├── fnf/         # full &amp; final settlement
+│   ├── interview/   # exit interview
+│   ├── survey/      # exit survey
+│   ├── documents/   # PDF generation
+│   ├── notifications/
+│   └── analytics/   # attrition, sentiment
+├── jobs/            # BullMQ workers
+│   ├── emailWorker.ts
+│   ├── pdfWorker.ts
+│   ├── slaWorker.ts
+│   ├── accessRevokeWorker.ts
+│   └── clearanceInitWorker.ts
+├── queues/          # Queue definitions
+├── services/        # Shared services (S3, mail, pdf)
+├── utils/           # Date calc, notice period, FnF formulas
+├── db/
+│   ├── migrations/  # Knex or pg-migrate SQL files
+│   └── seeds/       # Dev seed data
+└── types/           # Shared TypeScript interfaces</pre>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Key middleware chain</div>
+      <pre>Request → rateLimiter → cors → bodyParser
+       → authenticate (JWT verify)
+       → authorizeRole(['hr','manager'])  ← RBAC guard
+       → validateSchema(Zod)             ← input validation
+       → controller
+       → auditLogger                     ← writes audit_logs
+       → response</pre>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Notice period calculation utility</div>
+      <pre>// utils/noticePeriod.ts
+function calcPolicyLWD(
+  resignationDate: Date,
+  employmentType: EmploymentType,
+  policies: NoticePolicies
+): Date {
+  const days = policies[employmentType]; // e.g. confirmed = 60
+  return addWorkingDays(resignationDate, days);
+}
+
+function calcFnFDeduction(
+  approvedLWD: Date,
+  actualLWD: Date,
+  dailyRate: number
+): number {
+  const daysShort = diffWorkingDays(actualLWD, approvedLWD);
+  return Math.max(0, daysShort) * dailyRate;
+}</pre>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Phase rollout plan</div>
+      <div class="grid2" style="gap:12px;margin-top:8px">
+        <div>
+          <div class="section-label" style="color:var(--teal-text)">Phase 1 — MVP (8–10 weeks)</div>
+          <div style="font-size:12px;color:var(--text2);line-height:2">
+            ✓ Resignation submission + approval flow<br>
+            ✓ Multi-dept clearance with checklist<br>
+            ✓ Basic KT task assignment<br>
+            ✓ F&amp;F calculation + approval<br>
+            ✓ Relieving letter + experience certificate PDF<br>
+            ✓ Email notifications<br>
+            ✓ Role-based access (all 6 roles)<br>
+            ✓ Basic HR dashboard
+          </div>
+        </div>
+        <div>
+          <div class="section-label" style="color:var(--amber-text)">Phase 2 — Analytics + Automation (4–6 weeks)</div>
+          <div style="font-size:12px;color:var(--text2);line-height:2">
+            ○ Exit interview module<br>
+            ○ Anonymous survey + sentiment analytics<br>
+            ○ Attrition dashboard with charts<br>
+            ○ SLA escalation engine<br>
+            ○ IT access revocation webhooks<br>
+            ○ Absconding + termination flow<br>
+            ○ Rehire eligibility tagging<br>
+            ○ Bulk export (Excel/PDF reports)
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+function showTab(name, el) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('tab-' + name).classList.add('active');
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+// Theme: saved preference, else system
+const saved = localStorage.getItem('theme');
+if (saved === 'dark' || (!saved && matchMedia('(prefers-color-scheme: dark)').matches))
+  document.documentElement.classList.add('dark');
+document.getElementById('themeBtn').onclick = () => {
+  const dark = document.documentElement.classList.toggle('dark');
+  localStorage.setItem('theme', dark ? 'dark' : 'light');
+};
+</script>
+</body>
+</html>
